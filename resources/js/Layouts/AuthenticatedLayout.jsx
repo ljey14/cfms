@@ -30,6 +30,30 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    href={route('notification')}
+                                    active={route().current('notification')}
+                                >
+                                    Notification
+                                </NavLink>
+                                <NavLink
+                                    href={route('database')}
+                                    active={route().current('database')}
+                                >
+                                    Database
+                                </NavLink>
+                                <NavLink
+                                    href={route('feedbackForm')}
+                                    active={route().current('feedbackForm')}
+                                >
+                                    Feedback Form
+                                </NavLink>
+                                <NavLink
+                                    href={route('report')}
+                                    active={route().current('report')}
+                                >
+                                    Report
+                                </NavLink>
                             </div>
                         </div>
 
