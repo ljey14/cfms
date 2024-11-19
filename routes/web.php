@@ -1,9 +1,20 @@
 <?php
 
+use App\http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ShareController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Profile;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DataController;
+
+Route::get('data', [Profile::class,
+     'fetchData'
+     
+]);
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -18,10 +29,82 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/notification', function () {
+    return Inertia::render('Notification');
+})->middleware(['auth', 'verified'])->name('notification');
+
+Route::get('/database', function () {
+    return Inertia::render('Database');
+})->middleware(['auth', 'verified'])->name('database');
+
+Route::get('/feedbackForm', function () {
+    return Inertia::render('Feedbackform');
+})->middleware(['auth', 'verified'])->name('feedbackForm');
+
+Route::get('/report', function () {
+    return Inertia::render('Report');
+})->middleware(['auth', 'verified'])->name('report');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::post('/notifications/mark-read', [NotificationController::class, 'markAsRead']);
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/data', [DataController::class, 'index']);
+
+Route::resource('share', ShareController::class)
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->middleware(['auth', 'verified']);
+
 require __DIR__.'/auth.php';
+
+// Route::get('/', function(){
+
+//     return view('app');
+  
+//   });
+  
+  //with address
+  Route::get('/welcome', function(){
+  
+  return view('app');
+  
+  });
+  
+  //Return  string (Hello World)
+  
+  Route::get('/Welcome', function(){
+  
+  return 'Hello World, I am Rhea!';
+  
+  });
+  
+ //Return a header
+  
+  Route::get('/header', function(){
+  
+  return response('<h1></h1>');
+  
+  });
+  
+ //Return content type, route with Response
+  
+  Route::get('/header', function(){
+  
+  return response('<h1></h1>')
+  -> header ('Content-Type','text/plain')
+  ->header ('foo','bar');
+  });
+ 
+ //Route with parameter
+
+  Route::resource('/poste', PostController::class)
+  ->only(['index', 'store'])
+  ->middleware(['auth', 'verified']);
+
