@@ -40,12 +40,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                     href={route('database')}
                                     active={route().current('database')}
                                 >
-                                    Database
-                                </NavLink>
-                                <NavLink
-                                    href={route('feedbackForm')}
-                                    active={route().current('feedbackForm')}
-                                >
                                     Feedback Form
                                 </NavLink>
                                 <NavLink
