@@ -70,37 +70,6 @@ require __DIR__.'/auth.php';
   
 //   });
   
-  //with address
-  Route::get('/welcome', function(){
-  
-  return view('app');
-  
-  });
-  
-  //Return  string (Hello World)
-  
-  Route::get('/Welcome', function(){
-  
-  return 'Hello World, I am Rhea!';
-  
-  });
-  
- //Return a header
-  
-  Route::get('/header', function(){
-  
-  return response('<h1></h1>');
-  
-  });
-  
- //Return content type, route with Response
-  
-  Route::get('/header', function(){
-  
-  return response('<h1></h1>')
-  -> header ('Content-Type','text/plain')
-  ->header ('foo','bar');
-  });
  
  //Route with parameter
 
