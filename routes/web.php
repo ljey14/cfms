@@ -33,6 +33,16 @@ Route::get('/notification', function () {
     return Inertia::render('Notification');
 })->middleware(['auth', 'verified'])->name('notification');
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::post('/notifications/mark-read', [NotificationController::class, 'markAsRead']);
+});
+
+Route::get('/notifications', function () {
+    return Inertia::render('Notification');
+});
+
+
 Route::get('/database', function () {
     return Inertia::render('Database');
 })->middleware(['auth', 'verified'])->name('database');
@@ -70,10 +80,3 @@ require __DIR__.'/auth.php';
   
 //   });
   
- 
- //Route with parameter
-
-  Route::resource('/poste', PostController::class)
-  ->only(['index', 'store'])
-  ->middleware(['auth', 'verified']);
-
