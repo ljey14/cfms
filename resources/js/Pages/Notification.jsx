@@ -8,10 +8,12 @@ export default function Notification() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
 
+    // Fetch notifications when the page changes
     useEffect(() => {
         fetchNotifications(currentPage);
     }, [currentPage]);
 
+    // Fetch notifications from the API
     const fetchNotifications = async (page) => {
         try {
             const response = await axios.get(`/notifications?page=${page}`);
@@ -22,12 +24,27 @@ export default function Notification() {
         }
     };
 
+    // Mark a notification as read
     const markAsRead = async (timestamp, office) => {
         try {
             await axios.post('/notifications/mark-read', { timestamp, office });
-            fetchNotifications(currentPage);
+            // Optimistically update the notification status in the UI
+            setNotifications((prevNotifications) =>
+                prevNotifications.map((notification) =>
+                    notification.Timestamp === timestamp
+                        ? { ...notification, status: 'read' }
+                        : notification
+                )
+            );
         } catch (error) {
             console.error('Error marking notification as read:', error);
+        }
+    };
+
+    // Handle page change for pagination
+    const handlePageChange = (newPage) => {
+        if (newPage > 0 && newPage <= totalPages && notifications.length > 0) {
+            setCurrentPage(newPage);
         }
     };
 
@@ -44,66 +61,47 @@ export default function Notification() {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="bg-white shadow sm:rounded-lg overflow-hidden">
                         <div className="p-6">
-                            {/* Notification Table */}
                             <table className="w-full table-auto border-collapse">
                                 <thead>
                                     <tr className="bg-gray-100 text-left border-b">
-                                        <th className="px-4 py-3 text-center font-medium text-gray-600">
-                                            Timestamp
-                                        </th>
-                                        <th className="px-4 py-3 text-center font-medium text-gray-600">
-                                            Notification
-                                        </th>
-                                        <th className="px-4 py-3 text-center font-medium text-gray-600">
-                                            Action
-                                        </th>
+                                        <th className="px-4 py-3 text-center font-medium text-gray-800">Timestamp</th>
+                                        <th className="px-4 py-3 text-center font-medium text-gray-800">Notification</th>
+                                        <th className="px-4 py-3 text-center font-medium text-gray-800">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {notifications.length > 0 ? (
-                                        notifications.map((notification, index) => (
+                                        notifications.map((notification) => (
                                             <tr
-                                                key={index}
+                                                key={notification.Timestamp}
                                                 className={`border-b ${
-                                                    notification.status === 'unread'
-                                                        ? 'bg-yellow-50 font-semibold'
-                                                        : ''
+                                                    notification.status === 'unread' ? 'bg-yellow-50 font-semibold' : ''
                                                 }`}
                                             >
-                                                <td className="px-4 py-3 text-center text-gray-500">
-                                                    {notification.Timestamp}
-                                                </td>
+                                                <td className="px-4 py-3 text-center text-gray-500">{notification.Timestamp}</td>
                                                 <td className="px-4 py-3 text-center text-gray-500">
                                                     A new feedback has been submitted for the{' '}
-                                                    <span className="font-medium">
-                                                        {notification.Office}
-                                                    </span>
+                                                    <span className="font-medium">{notification.Office}</span>
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-3 text-center align-middle">
                                                     {notification.status === 'unread' ? (
                                                         <button
                                                             onClick={() =>
-                                                                markAsRead(
-                                                                    notification.Timestamp,
-                                                                    notification.Office
-                                                                )
+                                                                markAsRead(notification.Timestamp, notification.Office)
                                                             }
                                                             className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                                                         >
                                                             Mark as Read
                                                         </button>
                                                     ) : (
-                                                        <span className="text-green-600 text-center]">Read</span>
+                                                        <span className="text-green-600">Read</span>
                                                     )}
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td
-                                                colSpan="3"
-                                                className="px-4 py-6 text-center text-gray-500"
-                                            >
+                                            <td colSpan="3" className="px-4 py-6 text-center text-gray-500">
                                                 No notifications found.
                                             </td>
                                         </tr>
@@ -111,12 +109,9 @@ export default function Notification() {
                                 </tbody>
                             </table>
 
-                            {/* Pagination */}
                             <div className="mt-6 flex justify-center items-center space-x-2">
                                 <button
-                                    onClick={() =>
-                                        currentPage > 1 && setCurrentPage(currentPage - 1)
-                                    }
+                                    onClick={() => handlePageChange(currentPage - 1)}
                                     className={`px-4 py-2 text-sm font-medium rounded ${
                                         currentPage === 1
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -130,15 +125,13 @@ export default function Notification() {
                                     Page {currentPage} of {totalPages}
                                 </div>
                                 <button
-                                    onClick={() =>
-                                        currentPage < totalPages && setCurrentPage(currentPage + 1)
-                                    }
+                                    onClick={() => handlePageChange(currentPage + 1)}
                                     className={`px-4 py-2 text-sm font-medium rounded ${
-                                        currentPage === totalPages
+                                        currentPage === totalPages || totalPages === 0
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                             : 'bg-blue-500 text-white hover:bg-blue-600'
                                     }`}
-                                    disabled={currentPage === totalPages}
+                                    disabled={currentPage === totalPages || totalPages === 0}
                                 >
                                     Next
                                 </button>
