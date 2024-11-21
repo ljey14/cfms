@@ -7,12 +7,16 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Dashboard() {
-
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('ratings');
+    const [officeData, setOfficeData] = useState(null); // State to hold data for selected office
 
     useEffect(() => {
+        fetchAllOfficesData(); // Fetch all offices data on initial load
+    }, []);
+
+    const fetchAllOfficesData = () => {
         setLoading(true);
         axios.get('/data')
             .then(response => {
@@ -23,17 +27,30 @@ export default function Dashboard() {
                 console.error('Error fetching data:', error);
                 setLoading(false);
             });
-    }, []);
+    };
 
-    // Prepare the chart data
+    const fetchOfficeData = (office) => {
+        setLoading(true);
+        axios.get(`/data/${office}`) // Adjust the endpoint as necessary
+            .then(response => {
+                setOfficeData(response.data); // Set the data for the selected office
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching office data:', error);
+                setLoading(false);
+            });
+    };
+
+    // Prepare the chart data for all offices
     const chartData = {
-        labels: data.map(item => item.office),  // Labels for X-axis
+        labels: data.map(item => item.office),
         datasets: [
             {
                 label: 'Average Rating',
-                data: data.map(item => item.averageRating), // Y-axis data
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Bar color
-                borderColor: 'rgba(75, 192, 192, 1)',        // Border color
+                data: data.map(item => item.averageRating),
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
             },
         ],
@@ -48,28 +65,51 @@ export default function Dashboard() {
             }
         >
             <Head title="Dashboard" />
-    
+
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                            <div className="mb-4">
-                                <button 
-                                    className={`px-4 py-2 ${activeTab === 'ratings' ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`} 
-                                    onClick={() => setActiveTab('ratings')}
-                                >
-                                    Office Ratings
-                                </button>
+                    <div className="mb-4 flex justify-end space-x-4">
+                        <button 
+                            className={`px-4 py-2 ${activeTab === 'ratings' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
+                            onClick={() => {
+                                setActiveTab('ratings');
+                                fetchAllOfficesData(); // Fetch all offices data
+                            }}
+                        >
+                            All Offices
+                        </button>
 
-                                <button 
-                                    className={`px-4 py-2 ${activeTab === 'feedback' ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`} 
-                                    onClick={() => setActiveTab('feedback')}
-                                >
-                                    Feedback
-                                </button>
-                            </div>
+                        <button 
+                            className={`px-4 py-2 ${activeTab === 'Office 1' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
+                            onClick={() => {
+                                setActiveTab('Office 1');
+                                fetchOfficeData('SAS'); // Fetch data for Office 1
+                            }}
+                        >
+                            Office 1
+                        </button>
+                        <button 
+                            className={`px-4 py-2 ${activeTab === 'Office 2' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
+                            onClick={() => {
+                                setActiveTab('Office 2');
+                                fetchOfficeData('Office 2'); // Fetch data for Office 2
+                            }}
+                        >
+                            Office 2
+                        </button>
+                        <button 
+                            className={`px-4 py-2 ${activeTab === 'Office 3' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
+                            onClick={() => {
+                                setActiveTab('Office 3');
+                                fetchOfficeData('Office 3'); // Fetch data for Office 3
+                            }}
+                        >
+                            Office 3
+                        </button>
+                    </div>
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-    
-                           
+                        <div class ="p-6 text-gray-900">
+
                             {activeTab === 'ratings' && (
                                 <div>
                                     {loading ? (
@@ -83,35 +123,29 @@ export default function Dashboard() {
                                             ))}
                                         </ul>
                                     )}
-    
+
                                     <h3 className="mt-8 text-xl font-semibold">Office Ratings</h3>
                                     <div>
-                                        {/* Render Bar chart here */}
                                         <Bar data={chartData} />
                                     </div>
-    
-                                    {/* Display data list as a fallback */}
+
                                     {!loading && data.length === 0 && <p>No data available.</p>}
                                 </div>
                             )}
-    
-                            {activeTab === 'feedback' && (
+
+                            {activeTab !== 'ratings' && (
                                 <div className="mt-8">
-                                    <h3 className="text-xl font-semibold">Feedback</h3>
-                                    <div className="flex space-x-4 mt-4">
-                                        <div className="w-1/3 p-4 border-2 border-gray-300 rounded-lg">
-                                            <h4 className="font-semibold text-lg">Positive Feedback</h4>
-                                            <p>No data yet</p> {/* Replace with actual data if available */}
+                                    <h3 className="text-xl font-semibold">{activeTab} Feedback</h3>
+                                    {loading ? (
+                                        <p>Loading...</p>
+                                    ) : officeData ? (
+                                        <div>
+                                            <p>Average Rating: {officeData.averageRating}</p>
+                                            <p>Feedback: {officeData.feedback}</p>
                                         </div>
-                                        <div className="w-1/3 p-4 border-2 border-gray-300 rounded-lg">
-                                            <h4 className="font-semibold text-lg">Negative Feedback</h4>
-                                            <p>No data yet</p> {/* Replace with actual data if available */}
-                                        </div>
-                                        <div className="w-1/3 p-4 border-2 border-gray-300 rounded-lg">
-                                            <h4 className="font-semibold text-lg">Overall Feedback</h4>
-                                            <p>No data yet</p> {/* Replace with actual data if available */}
-                                        </div>
-                                    </div>
+                                    ) : (
+                                        <p>No data available for {activeTab}.</p>
+                                    )}
                                 </div>
                             )}
                         </div>
