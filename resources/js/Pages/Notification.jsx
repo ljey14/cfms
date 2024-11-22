@@ -89,7 +89,7 @@ export default function Notification() {
                                                             onClick={() =>
                                                                 markAsRead(notification.Timestamp, notification.Office)
                                                             }
-                                                            className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                                                            className="px-4 py-2 text-sm text-white bg-green-500 rounded hover:bg-green-600 focus:ring-2 focus:ring-green-300"
                                                         >
                                                             Mark as Read
                                                         </button>
@@ -115,7 +115,7 @@ export default function Notification() {
                                     className={`px-4 py-2 text-sm font-medium rounded ${
                                         currentPage === 1
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                                            : 'bg-green-500 text-white hover:bg-green-600'
                                     }`}
                                     disabled={currentPage === 1}
                                 >
@@ -129,7 +129,7 @@ export default function Notification() {
                                     className={`px-4 py-2 text-sm font-medium rounded ${
                                         currentPage === totalPages || totalPages === 0
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                                            : 'bg-green-500 text-white hover:bg-green-600'
                                     }`}
                                     disabled={currentPage === totalPages || totalPages === 0}
                                 >
