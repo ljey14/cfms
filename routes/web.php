@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Profile;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\DataController;
+use App\Http\Controllers\ReportController;
 
 Route::get('data', [Profile::class,
      'fetchData'
@@ -60,6 +61,9 @@ Route::get('/notifications', [NotificationController::class, 'index']);
 
 
 Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead']);
+
+Route::get('/clients', [ReportController::class, 'index']);
+Route::post('/report/send-feedback-summary', [ReportController::class, 'sendFeedbackSummary']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
