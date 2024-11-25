@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import axios from 'axios'; // Make sure Axios is installed
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -10,12 +11,9 @@ export default function Dashboard() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('ratings');
-    const [officeData, setOfficeData] = useState(null); // State to hold data for selected office
+    const [officeData, setOfficeData] = useState(null);
 
-    useEffect(() => {
-        fetchAllOfficesData(); // Fetch all offices data on initial load
-    }, []);
-
+    // Fetch general data for all offices
     const fetchAllOfficesData = () => {
         setLoading(true);
         axios.get('/data')
@@ -29,11 +27,12 @@ export default function Dashboard() {
             });
     };
 
+    // Fetch data for a specific office
     const fetchOfficeData = (office) => {
         setLoading(true);
-        axios.get(`/data/${office}`) // Adjust the endpoint as necessary
+        axios.get(`/data/${office === 'sas' ? 'sas' : office}`) // Adjust endpoint for SAS office
             .then(response => {
-                setOfficeData(response.data); // Set the data for the selected office
+                setOfficeData(response.data); // Set fetched office data
                 setLoading(false);
             })
             .catch(error => {
@@ -42,13 +41,13 @@ export default function Dashboard() {
             });
     };
 
-    // Prepare the chart data for all offices
+    // Chart data for all offices
     const chartData = {
-        labels: data.map(item => item.office),
+        labels: data.map(item => item.Office),
         datasets: [
             {
-                label: 'Average Rating',
-                data: data.map(item => item.averageRating),
+                label: 'Feedback Count',
+                data: data.map(item => item.feedback_count),
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
@@ -56,95 +55,67 @@ export default function Dashboard() {
         ],
     };
 
+    useEffect(() => {
+        fetchAllOfficesData(); // Load all office data on component mount
+    }, []);
+
     return (
         <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Dashboard</h2>}
         >
             <Head title="Dashboard" />
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="mb-4 flex justify-end space-x-4">
-                        <button 
-                            className={`px-4 py-2 ${activeTab === 'ratings' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
+                        <button
+                            className={`px-4 py-2 ${activeTab === 'ratings' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`}
                             onClick={() => {
                                 setActiveTab('ratings');
-                                fetchAllOfficesData(); // Fetch all offices data
+                                fetchAllOfficesData();
                             }}
                         >
                             All Offices
                         </button>
 
-                        <button 
-                            className={`px-4 py-2 ${activeTab === 'Office 1' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
+                        <button
+                            className={`px-4 py-2 ${activeTab === 'sas' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`}
                             onClick={() => {
-                                setActiveTab('Office 1');
-                                fetchOfficeData('SAS'); // Fetch data for Office 1
+                                setActiveTab('sas');
+                                fetchOfficeData('sas'); // Fetch data for SAS office
                             }}
                         >
-                            Office 1
-                        </button>
-                        <button 
-                            className={`px-4 py-2 ${activeTab === 'Office 2' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
-                            onClick={() => {
-                                setActiveTab('Office 2');
-                                fetchOfficeData('Office 2'); // Fetch data for Office 2
-                            }}
-                        >
-                            Office 2
-                        </button>
-                        <button 
-                            className={`px-4 py-2 ${activeTab === 'Office 3' ? 'bg-green-800 text-white' : 'bg-gray-200'} rounded`} 
-                            onClick={() => {
-                                setActiveTab('Office 3');
-                                fetchOfficeData('Office 3'); // Fetch data for Office 3
-                            }}
-                        >
-                            Office 3
+                            SAS Office
                         </button>
                     </div>
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div class ="p-6 text-gray-900">
 
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                        <div className="p-6 text-gray-900">
                             {activeTab === 'ratings' && (
                                 <div>
                                     {loading ? (
                                         <p>Loading...</p>
                                     ) : (
-                                        <ul>
-                                            {data.map((item, index) => (
-                                                <li key={index}>
-                                                    {item.id} - {item.name}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <div>
+                                            <h3 className="text-xl font-semibold">Office Feedback</h3>
+                                            <Bar data={chartData} />
+                                            {!loading && data.length === 0 && <p>No data available.</p>}
+                                        </div>
                                     )}
-
-                                    <h3 className="mt-8 text-xl font-semibold">Office Ratings</h3>
-                                    <div>
-                                        <Bar data={chartData} />
-                                    </div>
-
-                                    {!loading && data.length === 0 && <p>No data available.</p>}
                                 </div>
                             )}
 
-                            {activeTab !== 'ratings' && (
-                                <div className="mt-8">
-                                    <h3 className="text-xl font-semibold">{activeTab} Feedback</h3>
+                            {activeTab === 'sas' && (
+                                <div>
                                     {loading ? (
                                         <p>Loading...</p>
                                     ) : officeData ? (
                                         <div>
-                                            <p>Average Rating: {officeData.averageRating}</p>
-                                            <p>Feedback: {officeData.feedback}</p>
+                                            <h3 className="text-xl font-semibold">SAS Office Feedback</h3>
+                                            <p>Feedback Count: {officeData[0]?.feedback_count || 0}</p>
                                         </div>
                                     ) : (
-                                        <p>No data available for {activeTab}.</p>
+                                        <p>No data available for SAS.</p>
                                     )}
                                 </div>
                             )}
