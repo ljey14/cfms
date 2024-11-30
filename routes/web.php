@@ -10,11 +10,11 @@ use App\Http\Controllers\Profile;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\FeedbackController;
 
-Route::get('data', [Profile::class,
-     'fetchData'
-     
-]);
+Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+
 
 
 Route::get('/', function () {
@@ -70,10 +70,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-Route::resource('share', ShareController::class)
-    ->only(['index', 'store', 'update', 'destroy'])
-    ->middleware(['auth', 'verified']);
 
 require __DIR__.'/auth.php';
 
