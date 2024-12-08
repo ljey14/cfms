@@ -11,6 +11,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ModifyFormController;
+
+
+Route::get('/api/fetch-data', [ModifyFormController::class, 'fetchData'])->name('form.fetchData');
+
 
 Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
 Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
